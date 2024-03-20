@@ -5,6 +5,8 @@ import pandas as pd
 from hydra import compose, initialize
 from patsy import dmatrix
 import joblib
+import uvicorn
+import os
 
 from hydra.utils import to_absolute_path as abspath
 
@@ -14,7 +16,12 @@ with initialize(config_path="../../config"):
     config = compose(config_name="main")
     FEATURES = config.process.features
     MODEL_NAME = config.model.name
-model_path = f"../../{config.model.path}"
+# model_path = f"app/{config.model.path}"
+# print(model_path)
+
+# Get the absolute path to the models folder inside the Docker container
+MODELS_DIR = "/Employee_Retention/models"
+model_path = os.path.join(MODELS_DIR, 'xgboost')
 
 class Employee(BaseModel):
     """
@@ -99,6 +106,10 @@ def transform_data(df: pd.DataFrame):
 
 model = joblib.load(model_path)
 
+@app.get("/")
+def read_root():
+    return "Employee Churn  Prediction App"
+
 @app.get('/info')
 async def model_info():
     """Return model information, version, how to call"""
@@ -132,3 +143,4 @@ def predict(employee: Employee):
     df = transform_data(df)
     result = model.predict(df)[0]
     return PredictionResult(prediction=result)
+

@@ -12,6 +12,8 @@ with initialize(config_path="../../config"):
     MODEL_NAME = config.model.name
 
 
+
+#
 class Employee(BaseModel):
     """
     Pydantic model representing employee data.
@@ -114,5 +116,6 @@ def predict(employee: Employee) -> np.ndarray:
     df = transform_data(df)
     result = model.run(df)[0]
     return np.array(result)
+
 
 
